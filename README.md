@@ -22,30 +22,33 @@ Ce projet démontre concrètement :
 - Décomposition du double hashing : `h1 + i × h2 mod m` pour chaque position
 - Panneau de configuration interactif : sliders pour `n`, `p`, override de `k`
 - Formules `m` et `k` calculées en direct avec les équations exactes
-- 4 états de verdict : ✅ absent / 🟣 confirmé / ⚠️ faux positif / ❓ peut-être
-- PostgreSQL comme index exact pour confirmer ou infirmer le filtre
-- Chargement de ~5 000 usernames réels depuis un CSV au démarrage
+- 4 états de verdict : ✅ absent / 🟣 confirmé / ⚠️ faux positif / ❓ en attente
+- **Double moteur DB** : PostgreSQL (Docker) avec bascule automatique vers SQLite local (`bloom.db`) si Docker est éteint
+- **Métriques en direct** : Micro-benchmarks temps réel (temps Bloom en µs vs temps DB en ms, détection des requêtes évitées)
+- Échantillon de données propre et léger (`dataset/users_sample.csv` de 2 500 entrées) avec auto-seeding
 
 ## Architecture
 
 ```
 index.html  ──(fetch)──►  server.py (FastAPI)  ──►  Bloom Filter (mémoire)
                                 │                         ▲
-                                └──────────────►  PostgreSQL (Docker)
-                                                    (source de vérité)
+                                ├──────────────►  PostgreSQL (Docker)
+                                │                 ou SQLite (local)
+                                └──────────────►  (source de vérité)
 ```
 
 Au démarrage :
-1. `seed.py` charge `dataset/users.csv` dans PostgreSQL
-2. `server.py` reconstruit le Bloom Filter en mémoire depuis la DB
-3. Chaque requête passe d'abord par le filtre, puis par la DB si nécessaire
+1. `server.py` se connecte à PostgreSQL si disponible, ou initialise SQLite (`bloom.db`)
+2. Si la base est vide, elle est automatiquement peuplée depuis `dataset/users_sample.csv`
+3. Le Bloom Filter est reconstruit en mémoire en streaming par lots
+4. Chaque requête passe d'abord par le filtre (quelques microsecondes) : si absent, la requête SQL est évitée !
 
 ## Getting started
 
 ### Requirements
 
 - Python 3.10+
-- Docker Desktop
+- *(Optionnel)* Docker Desktop pour exécuter PostgreSQL (si non installé, SQLite local prend le relais sans configuration)
 - Un navigateur moderne (Chrome, Firefox, Edge)
 
 ### Installation
@@ -58,13 +61,13 @@ cd bloom-filter
 # 2. Installer les dépendances Python
 pip install -r requirements.txt
 
-# 3. Lancer PostgreSQL
+# 3. (Optionnel) Lancer PostgreSQL avec Docker
 docker-compose up -d
 
-# 4. Charger les données dans la DB (une seule fois)
-python seed.py
+# 4. Charger les données dans la DB (auto-détecte PostgreSQL ou SQLite)
+python seed.py --limit 1000
 
-# 5. Lancer le serveur
+# 5. Lancer le serveur API
 python server.py
 ```
 
@@ -72,13 +75,13 @@ python server.py
 
 ```bash
 # Ouvrir l'interface dans le navigateur
-# (double-clic sur index.html ou ouvrir via un serveur local)
+# Double-clic sur index.html ou ouvrir via Live Server
 
 # Tester le Bloom Filter seul (sans DB)
 python bloom_filter.py
 
-# Recharger les données si la DB est vide
-python seed.py
+# Recharger les données (options personnalisées)
+python seed.py --limit 2500 --db auto
 ```
 
 ### API disponible
