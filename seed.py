@@ -18,7 +18,7 @@ import sqlite3
 import sys
 import time
 
-PG_DSN = os.getenv("PG_DSN", "host=localhost port=5432 dbname=bloomdb user=bloom password=bloom")
+PG_DSN = os.getenv("PG_DSN", "host=127.0.0.1 port=5432 dbname=bloomdb user=bloom password=bloom")
 SQLITE_DB = os.getenv("SQLITE_PATH", "bloom.db")
 DEFAULT_SAMPLE = "dataset/users_sample.csv"
 DEFAULT_RAW = "dataset/users.csv"
@@ -64,7 +64,7 @@ def read_usernames(csv_path: str, limit: int | None = None) -> list[str]:
     return usernames
 
 
-def try_postgres(usernames: list[str]) -> bool:
+def try_postgres(usernames: list[str], reset: bool = False) -> bool:
     """Tente d'insérer dans PostgreSQL si disponible."""
     try:
         import psycopg
@@ -72,7 +72,7 @@ def try_postgres(usernames: list[str]) -> bool:
         return False
 
     try:
-        with psycopg.connect(PG_DSN, connect_timeout=2) as conn:
+        with psycopg.connect(PG_DSN, connect_timeout=1) as conn:
             with conn.cursor() as cur:
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS items (
@@ -82,6 +82,8 @@ def try_postgres(usernames: list[str]) -> bool:
                     );
                     CREATE INDEX IF NOT EXISTS idx_items_value ON items(value);
                 """)
+                if reset:
+                    cur.execute("TRUNCATE items RESTART IDENTITY;")
                 batch_size = 1000
                 total_inserted = 0
                 for i in range(0, len(usernames), batch_size):
@@ -101,7 +103,7 @@ def try_postgres(usernames: list[str]) -> bool:
         return False
 
 
-def seed_sqlite(usernames: list[str], db_path: str):
+def seed_sqlite(usernames: list[str], db_path: str, reset: bool = False):
     """Insère dans la base locale SQLite."""
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
@@ -113,6 +115,9 @@ def seed_sqlite(usernames: list[str], db_path: str):
         );
     """)
     cur.execute("CREATE INDEX IF NOT EXISTS idx_items_value ON items(value);")
+    if reset:
+        cur.execute("DELETE FROM items;")
+        conn.commit()
 
     batch_size = 1000
     total_inserted = 0
@@ -133,6 +138,7 @@ def main():
     parser.add_argument("--file", "-f", type=str, default=None, help="Chemin du CSV")
     parser.add_argument("--limit", "-n", type=int, default=1000, help="Nombre max d'items (0 = tout)")
     parser.add_argument("--db", choices=["auto", "postgres", "sqlite"], default="auto", help="Moteur DB")
+    parser.add_argument("--reset", "-r", action="store_true", help="Vide la table avant insertion")
     args = parser.parse_args()
 
     csv_file = get_csv_path(args.file)
@@ -142,15 +148,15 @@ def main():
     print(f"[seed] {len(usernames)} usernames chargés depuis le fichier en {time.perf_counter() - t0:.2f}s")
 
     if args.db == "postgres":
-        if not try_postgres(usernames):
+        if not try_postgres(usernames, reset=args.reset):
             print("[seed] Échec avec PostgreSQL.", file=sys.stderr)
             sys.exit(1)
     elif args.db == "sqlite":
-        seed_sqlite(usernames, SQLITE_DB)
+        seed_sqlite(usernames, SQLITE_DB, reset=args.reset)
     else:  # auto
-        if not try_postgres(usernames):
+        if not try_postgres(usernames, reset=args.reset):
             print("[seed] Bascule automatique vers SQLite...")
-            seed_sqlite(usernames, SQLITE_DB)
+            seed_sqlite(usernames, SQLITE_DB, reset=args.reset)
 
 
 if __name__ == "__main__":
