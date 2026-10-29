@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.venv/
+env/
+venv/
+
+# Large raw datasets (>100MB)
+dataset/users.csv
+
+# SQLite local databases & logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+server_log.txt
+
+# Docker volumes
+pgdata/
+
+# OS generated
+.DS_Store
+Thumbs.db

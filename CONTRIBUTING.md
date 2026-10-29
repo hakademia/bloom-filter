@@ -1,4 +1,4 @@
-# Contributing to [Project Name]
+# Contributing to Bloom Filter Demo
 
 Thank you for contributing to a Hakademia community project!
 
@@ -8,6 +8,7 @@ Thank you for contributing to a Hakademia community project!
 2. For substantial changes, open an issue first to discuss the approach.
 3. Be respectful, constructive, and welcoming in discussions and reviews.
 4. Never commit passwords, API keys, personal data, or other secrets.
+5. Ne jamais committer le fichier `dataset/users.csv` s'il contient des données personnelles réelles.
 
 ## Development workflow
 
@@ -17,6 +18,32 @@ Thank you for contributing to a Hakademia community project!
 4. Write clear commits explaining what changed.
 5. Open a pull request using the provided template.
 6. Address review feedback before merging.
+
+## Commit conventions
+
+Ce projet suit le format **Conventional Commits** :
+
+```
+<type>(<scope>): <description courte>
+
+Types : feat | fix | docs | refactor | chore
+Scope : filter | server | frontend | db | seed | config
+
+Exemples :
+  feat(filter): add k override support
+  fix(server): rebuild bloom filter from DB on startup
+  docs(readme): add installation instructions
+  chore(db): add seed script for CSV loading
+```
+
+## Branch naming
+
+```
+feat/<description>   → nouvelle fonctionnalité
+fix/<description>    → correction de bug
+docs/<description>   → documentation uniquement
+refactor/<description> → refactoring sans changement de comportement
+```
 
 ## Pull request expectations
 

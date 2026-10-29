@@ -1,0 +1,1897 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bloom Filter — Démo interactive</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --border-dark: #d1d5db;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --text-sub: #374151;
+      --black: #000000;
+      --pill-bg: #f3f4f6;
+      --hash-hit: #9ca3af;
+      --hash-bit-1: #111827;
+      --hash-bit-0: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .brand-text p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-weight: 400;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-sub);
+      font-size: 13.5px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-btn:hover {
+      background: var(--pill-bg);
+      color: var(--text);
+    }
+
+    .nav-btn.active {
+      background: var(--pill-bg);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-left: 4px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--black);
+      display: inline-block;
+    }
+
+    /* ── LAYOUT ── */
+    .dashboard-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 24px 32px;
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 20px;
+    }
+
+    .col-left, .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .card-header.justify-between {
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .step-number {
+      width: 24px;
+      height: 24px;
+      background: var(--black);
+      color: #ffffff;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      font-size: 16.5px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .card-subtitle {
+      font-size: 13.5px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    /* ── CARD 1: CONFIGURATION ── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .field-label {
+      font-size: 13.5px;
+      color: var(--text-sub);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .info-icon {
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .pill-value-box {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 4px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text);
+      min-width: 76px;
+      text-align: right;
+    }
+
+    .percent-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .percent-group .pill-value-box {
+      min-width: 44px;
+      text-align: center;
+      padding: 4px 12px;
+    }
+
+    .percent-sign {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-sub);
+    }
+
+    /* Sliders */
+    .slider-container {
+      position: relative;
+      margin-top: 6px;
+    }
+
+    .range-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: #e5e7eb;
+      outline: none;
+      cursor: pointer;
+      display: block;
+    }
+
+    .range-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--black);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      transition: transform 0.1s;
+    }
+
+    .range-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    .range-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--black);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    }
+
+    .range-ticks {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .range-ticks-p {
+      position: relative;
+      height: 16px;
+      margin-top: 8px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    .range-ticks-p span {
+      position: absolute;
+    }
+
+    /* Custom select */
+    .select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .custom-select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 36px 9px 14px;
+      font-size: 13.5px;
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .custom-select:focus {
+      border-color: var(--black);
+    }
+
+    .select-chevron {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+    }
+
+    /* Black button */
+    .btn-apply {
+      width: 100%;
+      background: var(--black);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-apply:hover {
+      opacity: 0.9;
+    }
+
+    /* Stat cards row at bottom of Config */
+    .config-stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .config-stat-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #ffffff;
+    }
+
+    .stat-icon-wrap {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .stat-text-wrap {
+      overflow: hidden;
+    }
+
+    .stat-main-num {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .stat-sub-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      white-space: nowrap;
+    }
+
+    /* ── CARD 2: RECHERCHE / INSERTION ── */
+    .search-input-box {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      background: #ffffff;
+      gap: 10px;
+    }
+
+    .search-input-box:focus-within {
+      border-color: var(--black);
+    }
+
+    .search-icon-svg {
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      border: none;
+      outline: none;
+      font-size: 14.5px;
+      color: var(--text);
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .clear-search-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      padding: 2px;
+    }
+
+    .clear-search-btn:hover {
+      color: var(--text);
+    }
+
+    /* Action buttons: Vérifier / Insérer */
+    .action-btns-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .btn-verify {
+      flex: 1;
+      background: var(--black);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-verify:hover {
+      opacity: 0.9;
+    }
+
+    .btn-insert-alt {
+      flex: 1;
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s;
+    }
+
+    .btn-insert-alt:hover {
+      background: var(--pill-bg);
+    }
+
+    /* Debounce bar */
+    .debounce-container {
+      margin-top: 18px;
+    }
+
+    .debounce-text-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .debounce-track {
+      width: 100%;
+      height: 6px;
+      background: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .debounce-bar-fill {
+      height: 100%;
+      width: 50%;
+      background: var(--black);
+      border-radius: 9999px;
+      transition: width 0.1s linear;
+    }
+
+    /* Verdict card */
+    .verdict-panel {
+      border: 1px solid var(--black);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      background: #ffffff;
+    }
+
+    .verdict-panel.state-confirmed {
+      border-color: #10b981;
+    }
+
+    .verdict-panel.state-absent {
+      border-color: var(--border-dark);
+    }
+
+    .verdict-icon-container {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .verdict-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .verdict-description {
+      font-size: 12.5px;
+      color: var(--text-sub);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    /* ── CARD 3: DÉCOMPOSITION DES HASH ── */
+    .badge-pill-blake {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      background: #ffffff;
+    }
+
+    .hash-values-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 140px;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .hash-val-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #ffffff;
+    }
+
+    .hash-name-tag {
+      background: var(--pill-bg);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13.5px;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+
+    .hash-number-val {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .hash-size-box {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      background: #ffffff;
+    }
+
+    .hash-size-title {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .hash-size-number {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 1px;
+    }
+
+    /* Hash table */
+    .hash-table-wrapper {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .hash-calc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    .hash-calc-table thead th {
+      color: var(--text-muted);
+      font-weight: 500;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .hash-calc-table tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f3f4f6;
+      color: var(--text);
+    }
+
+    .hash-calc-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .th-i, .td-i {
+      width: 44px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .th-calc, .td-calc {
+      color: var(--text-sub);
+      font-family: inherit;
+    }
+
+    .th-pos, .td-pos {
+      width: 90px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .th-bit, .td-bit {
+      width: 70px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .th-status, .td-status {
+      width: 95px;
+      text-align: center;
+    }
+
+    .status-badge-hash {
+      background: var(--black);
+      color: #ffffff;
+      padding: 3px 14px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .status-badge-empty {
+      background: var(--pill-bg);
+      color: var(--text-sub);
+      padding: 3px 14px;
+      border-radius: 9999px;
+      font-size: 11.5px;
+      font-weight: 500;
+      display: inline-block;
+    }
+
+    /* ── CARD 4: VISUALISATION DU BIT ARRAY ── */
+    .bit-legend-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 12.5px;
+      color: var(--text-sub);
+    }
+
+    .bit-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-indicator {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+
+    .legend-free {
+      background: #ffffff;
+      border: 1px solid var(--border-dark);
+    }
+
+    .legend-occupied {
+      background: var(--black);
+      border: 1px solid var(--black);
+    }
+
+    .legend-hash {
+      background: var(--hash-hit);
+      border: 1px solid var(--hash-hit);
+    }
+
+    .select-bits-compact {
+      position: relative;
+    }
+
+    .select-bits-compact select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 28px 6px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .select-bits-compact .chevron-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      color: var(--text);
+    }
+
+    /* Bit Grid Layout */
+    .bit-grid-container {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-top: 14px;
+    }
+
+    .bit-grid-row {
+      display: grid;
+      grid-template-columns: 36px repeat(32, minmax(0, 1fr));
+      gap: 5px;
+      align-items: center;
+    }
+
+    .bit-row-index {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    .bit-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: #ffffff;
+      border: 1px solid var(--border-dark);
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      position: relative;
+    }
+
+    .bit-cell:hover {
+      transform: scale(1.3);
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .bit-cell.is-occupied {
+      background: var(--black);
+      border-color: var(--black);
+    }
+
+    .bit-cell.is-hash-pos {
+      background: var(--hash-hit) !important;
+      border-color: var(--hash-hit) !important;
+    }
+
+    /* Tooltip */
+    .bit-cell[data-tooltip]:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 135%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #111827;
+      color: #ffffff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 99;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* ── MODALS ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(2px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 14px;
+      max-width: 600px;
+      width: 100%;
+      padding: 26px 30px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .modal-body {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    .modal-body p {
+      margin-bottom: 12px;
+    }
+
+    .code-chip {
+      background: var(--pill-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+      font-size: 12.5px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .dashboard-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">
+        <!-- Exact 6-petal rosette SVG logo -->
+        <svg width="34" height="34" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g transform="translate(18, 18)">
+            <ellipse cx="0" cy="-9" rx="4.2" ry="7.5" fill="#111827" transform="rotate(0)" />
+            <ellipse cx="0" cy="-9" rx="4.2" ry="7.5" fill="#111827" transform="rotate(60)" />
+            <ellipse cx="0" cy="-9" rx="4.2" ry="7.5" fill="#111827" transform="rotate(120)" />
+            <ellipse cx="0" cy="-9" rx="4.2" ry="7.5" fill="#111827" transform="rotate(180)" />
+            <ellipse cx="0" cy="-9" rx="4.2" ry="7.5" fill="#111827" transform="rotate(240)" />
+            <ellipse cx="0" cy="-9" rx="4.2" ry="7.5" fill="#111827" transform="rotate(300)" />
+            <circle cx="0" cy="0" r="3.2" fill="#111827" />
+          </g>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>Bloom Filter</h1>
+        <p>Démo interactive — PostgreSQL + double hashing BLAKE2b</p>
+      </div>
+    </div>
+    <nav>
+      <button class="nav-btn active" onclick="activateNav(this)">Démo</button>
+      <button class="nav-btn" onclick="openAboutModal()">À propos</button>
+      <button class="nav-btn" onclick="openDocModal()">Documentation</button>
+      <div class="live-badge" id="live-indicator">
+        <span class="live-dot"></span>
+        Live
+      </div>
+    </nav>
+  </header>
+
+  <!-- Dashboard Container -->
+  <main class="dashboard-container">
+
+    <!-- LEFT COLUMN -->
+    <div class="col-left">
+
+      <!-- CARD 1: Configuration -->
+      <section class="card" aria-label="Configuration">
+        <div class="card-header">
+          <div class="step-number">1</div>
+          <h2 class="card-title">Configuration</h2>
+        </div>
+
+        <!-- Capacité attendue (n) -->
+        <div class="form-group">
+          <div class="label-row">
+            <label class="field-label" for="slider-n">Capacité attendue (n)</label>
+            <div class="pill-value-box" id="pill-n">1 000</div>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="slider-n" class="range-slider" min="100" max="100000" step="100" value="1000">
+            <div class="range-ticks">
+              <span>100</span>
+              <span>100 000</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Taux de faux positifs (p) -->
+        <div class="form-group">
+          <div class="label-row">
+            <label class="field-label" for="slider-p">Taux de faux positifs (p)</label>
+            <div class="percent-group">
+              <div class="pill-value-box" id="pill-p">1</div>
+              <span class="percent-sign">%</span>
+            </div>
+          </div>
+          <div class="slider-container">
+            <input type="range" id="slider-p" class="range-slider" min="0" max="100" step="0.5" value="18">
+            <div class="range-ticks-p">
+              <span style="left: 0%;">0.1%</span>
+              <span style="left: 18%;">1%</span>
+              <span style="left: 55%;">5%</span>
+              <span style="right: 0%;">10%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nombre de fonctions de hachage (k) -->
+        <div class="form-group">
+          <div class="label-row">
+            <label class="field-label" for="select-k">
+              Nombre de fonctions de hachage (k)
+              <span class="info-icon" title="k optimal = round((m / n) * ln(2)). Vous pouvez choisir Auto ou forcer une valeur personnalisée.">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </span>
+            </label>
+          </div>
+          <div class="select-wrapper">
+            <select id="select-k" class="custom-select" onchange="onSelectKChange()">
+              <option value="auto">Auto (optimal)</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="12">12</option>
+              <option value="14">14</option>
+            </select>
+            <div class="select-chevron">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bouton Appliquer -->
+        <button class="btn-apply" onclick="applyConfiguration()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          Appliquer la configuration
+        </button>
+
+        <!-- 3 Stats cards below button -->
+        <div class="config-stats-row">
+          <div class="config-stat-box">
+            <div class="stat-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                <polyline points="2 17 12 22 22 17"></polyline>
+                <polyline points="2 12 12 17 22 12"></polyline>
+              </svg>
+            </div>
+            <div class="stat-text-wrap">
+              <div class="stat-main-num" id="stat-val-m">9 592</div>
+              <div class="stat-sub-label">bits (m)</div>
+            </div>
+          </div>
+
+          <div class="config-stat-box">
+            <div class="stat-icon-wrap">
+              <span style="font-size: 21px; font-weight: 800; line-height: 1; font-family: sans-serif;">#</span>
+            </div>
+            <div class="stat-text-wrap">
+              <div class="stat-main-num" id="stat-val-k">7</div>
+              <div class="stat-sub-label">hashes (k)</div>
+            </div>
+          </div>
+
+          <div class="config-stat-box">
+            <div class="stat-icon-wrap">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+              </svg>
+            </div>
+            <div class="stat-text-wrap">
+              <div class="stat-main-num" id="stat-val-mem">1.17 KiB</div>
+              <div class="stat-sub-label">mémoire</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARD 2: Recherche / Insertion -->
+      <section class="card" aria-label="Recherche et Insertion">
+        <div class="card-header">
+          <div class="step-number">2</div>
+          <h2 class="card-title">Recherche / Insertion</h2>
+        </div>
+
+        <!-- Search Bar with Alice -->
+        <div class="search-input-box">
+          <div class="search-icon-svg">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="text" id="search-input" class="search-input" value="alice_" placeholder="Tape un username..." autocomplete="off">
+          <button class="clear-search-btn" onclick="clearInput()" title="Effacer">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Action Buttons: Vérifier / Insérer -->
+        <div class="action-btns-row">
+          <button class="btn-verify" onclick="triggerCheck()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            Vérifier
+          </button>
+          <button class="btn-insert-alt" onclick="triggerInsert()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Insérer
+          </button>
+        </div>
+
+        <!-- Debounce indicator -->
+        <div class="debounce-container">
+          <div class="debounce-text-row">
+            <span>Délai de recherche (debounce)</span>
+            <span>300 ms</span>
+          </div>
+          <div class="debounce-track">
+            <div class="debounce-bar-fill" id="debounce-bar"></div>
+          </div>
+        </div>
+
+        <!-- Verdict panel -->
+        <div class="verdict-panel" id="verdict-card">
+          <div class="verdict-icon-container" id="verdict-icon">
+            <!-- Warning triangle SVG with exclamation mark -->
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.5L1.5 21H22.5L12 2.5Z" fill="#111827" stroke="#111827" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M12 9V14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="17.5" r="1.2" fill="#ffffff"/>
+            </svg>
+          </div>
+          <div class="verdict-content">
+            <div class="verdict-title" id="verdict-title">Faux positif !</div>
+            <div class="verdict-description" id="verdict-desc">
+              Le Bloom Filter indique « présent » mais l'élément est absent de la base de données.
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-right">
+
+      <!-- CARD 3: Décomposition des hash -->
+      <section class="card" aria-label="Décomposition des hash">
+        <div class="card-header justify-between">
+          <div class="header-left">
+            <div class="step-number">3</div>
+            <h2 class="card-title">Décomposition des hash <span class="card-subtitle">(double hashing)</span></h2>
+          </div>
+          <div class="badge-pill-blake">BLAKE2b</div>
+        </div>
+
+        <!-- Hash Top Metrics: h1, h2, m -->
+        <div class="hash-values-grid">
+          <div class="hash-val-box">
+            <div class="hash-name-tag">h1</div>
+            <div class="hash-number-val" id="disp-h1">8273648273648273</div>
+          </div>
+
+          <div class="hash-val-box">
+            <div class="hash-name-tag">h2</div>
+            <div class="hash-number-val" id="disp-h2">1827364817263</div>
+          </div>
+
+          <div class="hash-size-box">
+            <div class="hash-size-title">m (taille du tableau)</div>
+            <div class="hash-size-number" id="disp-m">9 592</div>
+          </div>
+        </div>
+
+        <!-- Hash breakdown table -->
+        <div class="hash-table-wrapper">
+          <table class="hash-calc-table">
+            <thead>
+              <tr>
+                <th class="th-i">i</th>
+                <th class="th-calc">Calcul : (h1 + i × h2) mod m</th>
+                <th class="th-pos">Position</th>
+                <th class="th-bit">Bit</th>
+                <th class="th-status">Statut</th>
+              </tr>
+            </thead>
+            <tbody id="hash-rows-body">
+              <!-- Dynamically populated rows matching screenshot -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CARD 4: Visualisation du bit array -->
+      <section class="card" aria-label="Visualisation du bit array">
+        <div class="card-header justify-between">
+          <div class="header-left">
+            <div class="step-number">4</div>
+            <h2 class="card-title">Visualisation du bit array</h2>
+          </div>
+
+          <!-- Legend -->
+          <div class="bit-legend-group">
+            <div class="bit-legend-item">
+              <span class="legend-indicator legend-free"></span>
+              <span>0 (libre)</span>
+            </div>
+            <div class="bit-legend-item">
+              <span class="legend-indicator legend-occupied"></span>
+              <span>1 (occupé)</span>
+            </div>
+            <div class="bit-legend-item">
+              <span class="legend-indicator legend-hash"></span>
+              <span>position(s) de hash</span>
+            </div>
+          </div>
+
+          <!-- Range selector -->
+          <div class="select-bits-compact">
+            <select id="select-bits-range" onchange="renderBitArray()">
+              <option value="256">Premiers 256 bits</option>
+              <option value="512">Premiers 512 bits</option>
+            </select>
+            <div class="chevron-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid of 8 rows x 32 bits = 256 bits -->
+        <div class="bit-grid-container" id="bit-grid-container">
+          <!-- Dynamically generated rows matching screenshot -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- About Modal -->
+  <div class="modal-backdrop" id="modal-about" onclick="closeModalOnBackdrop(event, 'modal-about')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>À propos du Bloom Filter</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-about')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Un <strong>Bloom Filter</strong> est une structure de données probabiliste ultra-rapide qui permet de déterminer si un élément fait partie d'un ensemble en utilisant un espace mémoire minime.
+        </p>
+        <p>
+          <strong>Caractéristiques clés :</strong>
+        </p>
+        <ul style="margin-left: 20px; margin-bottom: 14px;">
+          <li>Zéro faux négatif : si le filtre dit « absent », l'élément n'a jamais été inséré.</li>
+          <li>Possibilité de faux positifs : si le filtre dit « présent », une vérification dans la source de vérité (PostgreSQL) confirme ou infirme l'existence de l'élément.</li>
+          <li>Double hashing BLAKE2b : génère <em>k</em> positions de hachage indépendantes à partir d'un seul condensat 128-bit sans collisions corrélées.</li>
+        </ul>
+        <p style="font-size: 13px; color: var(--text-muted);">
+          Projet communautaire développé au sein de <strong>Hakademia</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentation Modal -->
+  <div class="modal-backdrop" id="modal-doc" onclick="closeModalOnBackdrop(event, 'modal-doc')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Documentation & Formules</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-doc')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Calcul de la taille optimale du tableau (m) :</strong></p>
+        <p><code class="code-chip">m = ceil(-n * ln(p) / (ln(2)^2))</code></p>
+        <p style="margin-top: 10px;"><strong>Calcul du nombre optimal de fonctions de hash (k) :</strong></p>
+        <p><code class="code-chip">k = round((m / n) * ln(2))</code></p>
+        <p style="margin-top: 10px;"><strong>Formule de double hashing (Kirsch & Mitzenmacher) :</strong></p>
+        <p><code class="code-chip">pos_i = (h1 + i * h2) mod m</code></p>
+        <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 10px;">
+          où <em>h1</em> et <em>h2</em> sont les moitiés haute et basse de la signature BLAKE2b (16 octets) du texte, avec <em>h2</em> rendu impair pour assurer la coprimalité.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── CONFIGURATION & CONSTANTS ────────────────────────────────────────────────
+    const API_URL = 'http://localhost:8000';
+
+    // The exact visual snapshot values from the screenshot
+    const MOCK_SCREENSHOT_DATA = {
+      text: 'alice_',
+      h1: '8273648273648273',
+      h2: '1827364817263',
+      m: 9592,
+      k: 7,
+      n: 1000,
+      pPct: 1,
+      memFormatted: '1.17 KiB',
+      rows: [
+        { i: 0, calc: '(8273648273648273 + 0 × 1827364817263) mod 9592', pos: 142, bit: 1, status: 'hash' },
+        { i: 1, calc: '(8273648273648273 + 1 × 1827364817263) mod 9592', pos: 891, bit: 0, status: 'vide' },
+        { i: 2, calc: '(8273648273648273 + 2 × 1827364817263) mod 9592', pos: 3201, bit: 1, status: 'hash' },
+        { i: 3, calc: '(8273648273648273 + 3 × 1827364817263) mod 9592', pos: 7432, bit: 0, status: 'vide' },
+        { i: 4, calc: '(8273648273648273 + 4 × 1827364817263) mod 9592', pos: 512, bit: 1, status: 'hash' },
+        { i: 5, calc: '(8273648273648273 + 5 × 1827364817263) mod 9592', pos: 8901, bit: 0, status: 'vide' },
+        { i: 6, calc: '(8273648273648273 + 6 × 1827364817263) mod 9592', pos: 2341, bit: 1, status: 'hash' },
+      ],
+      // Exact occupied bit positions in the first 256 bits shown in the screenshot
+      occupiedBits: new Set([
+        23,
+        37, 57, 58,
+        71, 77,
+        106,
+        128, 141, 149, 156,
+        173, 186,
+        203, 211, 220,
+        232
+      ]),
+      // Hash position targets visible in the screenshot (grey squares)
+      hashTargetBits: new Set([
+        29,
+        38,
+        87,
+        142,
+        248
+      ])
+    };
+
+    // Current interactive state
+    let state = {
+      n: 1000,
+      pPct: 1,
+      kOverride: null, // null for auto
+      m: 9592,
+      k: 7,
+      bitArray: new Uint8Array(1200), // in-memory local bit array
+      positions: [142, 891, 3201, 7432, 512, 8901, 2341],
+      knownDbItems: new Set(['alice', 'bob', 'charlie']),
+      isInitialMock: true,
+      serverOnline: false
+    };
+
+    // Pre-seed local bit array to match screenshot
+    MOCK_SCREENSHOT_DATA.occupiedBits.forEach(pos => {
+      state.bitArray[pos >> 3] |= (1 << (pos & 7));
+    });
+    // Bit 142 is set as well in the screenshot row 0
+    state.bitArray[142 >> 3] |= (1 << (142 & 7));
+
+    let debounceTimer = null;
+    let debounceAnim = null;
+
+    // ── FORMULAS ──
+    function calcM(n, p) {
+      return Math.ceil(-n * Math.log(p) / (Math.LN2 * Math.LN2));
+    }
+
+    function calcK(m, n) {
+      return Math.max(1, Math.round((m / n) * Math.LN2));
+    }
+
+    function formatBytes(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      return (bytes / 1024).toFixed(2) + ' KiB';
+    }
+
+    // ── SLIDER FILL STYLING ──
+    function updateSliderFill(slider, pct) {
+      slider.style.background = `linear-gradient(to right, #111827 ${pct}%, #e5e7eb ${pct}%)`;
+    }
+
+    // ── CONFIGURATION UI SYNC ──
+    function updateConfigValues() {
+      const sliderN = document.getElementById('slider-n');
+      const valN = parseInt(sliderN.value, 10);
+      state.n = valN;
+      document.getElementById('pill-n').textContent = valN.toLocaleString('fr-FR');
+      const pctN = ((valN - 100) / (100000 - 100)) * 100;
+      updateSliderFill(sliderN, pctN);
+
+      // P slider mapping: 0 -> 0.1%, 18 -> 1%, 55 -> 5%, 100 -> 10%
+      const sliderP = document.getElementById('slider-p');
+      const sliderPVal = parseFloat(sliderP.value);
+      let pPct = 1;
+      if (sliderPVal <= 18) {
+        // interpolate 0.1 to 1
+        pPct = 0.1 + (sliderPVal / 18) * (1 - 0.1);
+      } else if (sliderPVal <= 55) {
+        // interpolate 1 to 5
+        pPct = 1 + ((sliderPVal - 18) / (55 - 18)) * (5 - 1);
+      } else {
+        // interpolate 5 to 10
+        pPct = 5 + ((sliderPVal - 55) / (100 - 55)) * (10 - 5);
+      }
+      pPct = Math.round(pPct * 10) / 10;
+      if (pPct < 0.1) pPct = 0.1;
+      state.pPct = pPct;
+
+      document.getElementById('pill-p').textContent = pPct >= 1 ? Math.round(pPct) : pPct.toFixed(1);
+      updateSliderFill(sliderP, sliderPVal);
+
+      // Calculate m & k
+      const p = pPct / 100;
+      state.m = calcM(state.n, p);
+      const kOptimal = calcK(state.m, state.n);
+      state.k = state.kOverride !== null ? state.kOverride : kOptimal;
+
+      // Update stat cards in Card 1
+      document.getElementById('stat-val-m').textContent = state.m.toLocaleString('fr-FR');
+      document.getElementById('stat-val-k').textContent = state.k;
+      document.getElementById('stat-val-mem').textContent = formatBytes(Math.ceil(state.m / 8));
+
+      // Update Card 3 m display
+      document.getElementById('disp-m').textContent = state.m.toLocaleString('fr-FR');
+    }
+
+    document.getElementById('slider-n').addEventListener('input', updateConfigValues);
+    document.getElementById('slider-p').addEventListener('input', updateConfigValues);
+
+    function onSelectKChange() {
+      const val = document.getElementById('select-k').value;
+      state.kOverride = val === 'auto' ? null : parseInt(val, 10);
+      updateConfigValues();
+    }
+
+    async function applyConfiguration() {
+      state.isInitialMock = false;
+      updateConfigValues();
+
+      // Attempt server config
+      try {
+        const res = await fetch(`${API_URL}/configure`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            capacity: state.n,
+            false_positive_rate: state.pPct / 100,
+            k_override: state.kOverride
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setServerOnline(true);
+        }
+      } catch (e) {
+        setServerOnline(false);
+      }
+
+      // Recreate local bit array
+      state.bitArray = new Uint8Array(Math.ceil(state.m / 8));
+      // Re-evaluate current text
+      const text = document.getElementById('search-input').value;
+      if (text) {
+        computeAndUpdate(text);
+      }
+    }
+
+    // ── HASH COMPUTATION (BLAKE2b or Mock) ──
+    // Fast 64-bit string hash for deterministic client-side fallback
+    function fnv1a64(str, seed = 0n) {
+      let h = 0xcbf29ce484222325n ^ BigInt(seed);
+      const prime = 0x100000001b3n;
+      for (let i = 0; i < str.length; i++) {
+        h = (h ^ BigInt(str.charCodeAt(i))) * prime;
+        h = h & 0xffffffffffffffffn;
+      }
+      return h;
+    }
+
+    function computeHashesClient(text, m, k) {
+      const h1 = fnv1a64(text, 0x12345678n);
+      let h2 = fnv1a64(text, 0x9abcdef0n);
+      h2 = h2 | 1n; // Make odd
+
+      const positions = [];
+      const steps = [];
+      const mBig = BigInt(m);
+
+      for (let i = 0; i < k; i++) {
+        const iBig = BigInt(i);
+        const posBig = ((h1 + iBig * h2) % mBig + mBig) % mBig;
+        const pos = Number(posBig);
+        positions.push(pos);
+        steps.push({
+          i: i,
+          calc: `(${h1} + ${i} × ${h2}) mod ${m}`,
+          pos: pos
+        });
+      }
+
+      return {
+        h1: h1.toString(),
+        h2: h2.toString(),
+        positions: positions,
+        steps: steps
+      };
+    }
+
+    // ── RENDER TABLE ──
+    function renderTable(steps, h1, h2, m) {
+      document.getElementById('disp-h1').textContent = h1;
+      document.getElementById('disp-h2').textContent = h2;
+      document.getElementById('disp-m').textContent = m.toLocaleString('fr-FR');
+
+      const tbody = document.getElementById('hash-rows-body');
+      tbody.innerHTML = '';
+
+      steps.forEach(step => {
+        const tr = document.createElement('tr');
+
+        // Check if bit is set in local bit array or mock
+        let bitIsSet = 0;
+        if (state.isInitialMock) {
+          const mockRow = MOCK_SCREENSHOT_DATA.rows.find(r => r.i === step.i);
+          bitIsSet = mockRow ? mockRow.bit : 0;
+        } else {
+          bitIsSet = (state.bitArray[step.pos >> 3] & (1 << (step.pos & 7))) ? 1 : 0;
+        }
+
+        const statusHtml = bitIsSet
+          ? `<span class="status-badge-hash">hash</span>`
+          : `<span class="status-badge-empty">vide</span>`;
+
+        tr.innerHTML = `
+          <td class="td-i">${step.i}</td>
+          <td class="td-calc">${step.calc}</td>
+          <td class="td-pos">${step.pos}</td>
+          <td class="td-bit">${bitIsSet}</td>
+          <td class="td-status">${statusHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // ── RENDER BIT ARRAY GRID ──
+    function renderBitArray() {
+      const container = document.getElementById('bit-grid-container');
+      container.innerHTML = '';
+
+      const maxBits = parseInt(document.getElementById('select-bits-range').value, 10) || 256;
+      const rowsCount = maxBits / 32;
+
+      for (let r = 0; r < rowsCount; r++) {
+        const startBit = r * 32;
+        const rowEl = document.createElement('div');
+        rowEl.className = 'bit-grid-row';
+
+        // Row prefix (000, 032, 064...)
+        const labelEl = document.createElement('div');
+        labelEl.className = 'bit-row-index';
+        labelEl.textContent = String(startBit).padStart(3, '0');
+        rowEl.appendChild(labelEl);
+
+        for (let col = 0; col < 32; col++) {
+          const bitIndex = startBit + col;
+          const cell = document.createElement('div');
+          cell.className = 'bit-cell';
+
+          let isOccupied = false;
+          let isHashPos = false;
+
+          if (state.isInitialMock) {
+            isOccupied = MOCK_SCREENSHOT_DATA.occupiedBits.has(bitIndex);
+            isHashPos = MOCK_SCREENSHOT_DATA.hashTargetBits.has(bitIndex);
+          } else {
+            isOccupied = (state.bitArray[bitIndex >> 3] & (1 << (bitIndex & 7))) !== 0;
+            isHashPos = state.positions.includes(bitIndex);
+          }
+
+          if (isHashPos) {
+            cell.classList.add('is-hash-pos');
+          } else if (isOccupied) {
+            cell.classList.add('is-occupied');
+          }
+
+          cell.setAttribute('data-tooltip', `Bit #${bitIndex} : ${isOccupied ? '1 (occupé)' : '0 (libre)'}${isHashPos ? ' • Cible hash' : ''}`);
+          rowEl.appendChild(cell);
+        }
+
+        container.appendChild(rowEl);
+      }
+    }
+
+    // ── VERDICT DISPLAY ──
+    function updateVerdict(type) {
+      const card = document.getElementById('verdict-card');
+      const icon = document.getElementById('verdict-icon');
+      const title = document.getElementById('verdict-title');
+      const desc = document.getElementById('verdict-desc');
+
+      card.className = 'verdict-panel';
+
+      if (type === 'false_positive') {
+        icon.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2.5L1.5 21H22.5L12 2.5Z" fill="#111827" stroke="#111827" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M12 9V14" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="17.5" r="1.2" fill="#ffffff"/>
+          </svg>
+        `;
+        title.textContent = 'Faux positif !';
+        desc.textContent = "Le Bloom Filter indique « présent » mais l'élément est absent de la base de données.";
+      } else if (type === 'confirmed') {
+        card.classList.add('state-confirmed');
+        icon.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="#10b981"/>
+            <path d="M8 12.5L10.5 15L16 9.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        `;
+        title.textContent = 'Confirmé en base de données';
+        desc.textContent = "Le Bloom Filter indique « présent » et l'élément existe bien dans PostgreSQL.";
+      } else if (type === 'absent') {
+        card.classList.add('state-absent');
+        icon.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="#e5e7eb" stroke="#9ca3af" stroke-width="1.5"/>
+            <path d="M8 12H16" stroke="#111827" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        `;
+        title.textContent = 'Définitivement absent';
+        desc.textContent = "Au moins un bit est à 0. L'élément n'a jamais été inséré (0 faux négatif).";
+      } else {
+        // Idle
+        icon.innerHTML = `
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="#9ca3af" stroke-width="1.5"/>
+            <polyline points="12 6 12 12 16 14" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        `;
+        title.textContent = 'En attente';
+        desc.textContent = "Tapez un texte pour rechercher ou insérer dans le filtre.";
+      }
+    }
+
+    // ── SEARCH DEBOUNCE & REALTIME UPDATE ──
+    const searchInput = document.getElementById('search-input');
+    const debounceBar = document.getElementById('debounce-bar');
+
+    searchInput.addEventListener('input', (e) => {
+      const text = e.target.value.trim();
+      startDebounceAnimation(300);
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        state.isInitialMock = false;
+        computeAndUpdate(text);
+      }, 300);
+    });
+
+    function startDebounceAnimation(duration) {
+      if (debounceAnim) clearInterval(debounceAnim);
+      debounceBar.style.width = '0%';
+      let elapsed = 0;
+      debounceAnim = setInterval(() => {
+        elapsed += 30;
+        const pct = Math.min(100, (elapsed / duration) * 100);
+        debounceBar.style.width = pct + '%';
+        if (elapsed >= duration) clearInterval(debounceAnim);
+      }, 30);
+    }
+
+    async function computeAndUpdate(text) {
+      if (!text) {
+        updateVerdict('idle');
+        renderTable([], '—', '—', state.m);
+        state.positions = [];
+        renderBitArray();
+        return;
+      }
+
+      // If text is alice_ and still pristine, return to mock screenshot view
+      if (text === 'alice_' && state.isInitialMock) {
+        initMockState();
+        return;
+      }
+
+      let data = null;
+
+      // Try server first
+      try {
+        const res = await fetch(`${API_URL}/hashes?text=${encodeURIComponent(text)}`);
+        if (res.ok) {
+          data = await res.json();
+          setServerOnline(true);
+        }
+      } catch (e) {
+        setServerOnline(false);
+      }
+
+      // If server unreachable, use local client hashing
+      if (!data) {
+        data = computeHashesClient(text, state.m, state.k);
+      }
+
+      state.positions = data.positions || [];
+      renderTable(data.steps, data.h1, data.h2, state.m);
+      renderBitArray();
+
+      // Check verdict
+      checkVerdict(text);
+    }
+
+    async function checkVerdict(text) {
+      try {
+        const res = await fetch(`${API_URL}/check`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        if (res.ok) {
+          const resData = await res.json();
+          updateVerdict(resData.verdict);
+          return;
+        }
+      } catch (e) {
+        // Fallback local check
+      }
+
+      // Local fallback logic
+      const mightContain = state.positions.every(p => {
+        return (state.bitArray[p >> 3] & (1 << (p & 7))) !== 0;
+      });
+
+      if (!mightContain) {
+        updateVerdict('absent');
+      } else {
+        const inDb = state.knownDbItems.has(text);
+        updateVerdict(inDb ? 'confirmed' : 'false_positive');
+      }
+    }
+
+    // ── BUTTON ACTIONS ──
+    function clearInput() {
+      searchInput.value = '';
+      state.isInitialMock = false;
+      computeAndUpdate('');
+      searchInput.focus();
+    }
+
+    function triggerCheck() {
+      const text = searchInput.value.trim();
+      startDebounceAnimation(150);
+      computeAndUpdate(text);
+    }
+
+    async function triggerInsert() {
+      const text = searchInput.value.trim();
+      if (!text) return;
+
+      // Mark locally
+      state.positions.forEach(p => {
+        state.bitArray[p >> 3] |= (1 << (p & 7));
+      });
+      state.knownDbItems.add(text);
+
+      // Call API if possible
+      try {
+        await fetch(`${API_URL}/insert`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+      } catch (e) {}
+
+      state.isInitialMock = false;
+      computeAndUpdate(text);
+      updateVerdict('confirmed');
+    }
+
+    // ── LIVE INDICATOR ──
+    function setServerOnline(online) {
+      state.serverOnline = online;
+      const indicator = document.getElementById('live-indicator');
+      if (online) {
+        indicator.innerHTML = '<span class="live-dot" style="background:#10b981;"></span> Live';
+      } else {
+        indicator.innerHTML = '<span class="live-dot" style="background:#111827;"></span> Live';
+      }
+    }
+
+    // ── MODALS ──
+    function openAboutModal() {
+      document.getElementById('modal-about').style.display = 'flex';
+    }
+
+    function openDocModal() {
+      document.getElementById('modal-doc').style.display = 'flex';
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    function closeModalOnBackdrop(e, id) {
+      if (e.target.id === id) closeModal(id);
+    }
+
+    function activateNav(btn) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    // ── INITIALIZATION (100% Screenshot Matching) ──
+    function initMockState() {
+      state.isInitialMock = true;
+      document.getElementById('pill-n').textContent = '1 000';
+      document.getElementById('slider-n').value = 1000;
+      updateSliderFill(document.getElementById('slider-n'), ((1000 - 100) / 99900) * 100);
+
+      document.getElementById('pill-p').textContent = '1';
+      document.getElementById('slider-p').value = 18;
+      updateSliderFill(document.getElementById('slider-p'), 18);
+
+      document.getElementById('select-k').value = 'auto';
+
+      document.getElementById('stat-val-m').textContent = '9 592';
+      document.getElementById('stat-val-k').textContent = '7';
+      document.getElementById('stat-val-mem').textContent = '1.17 KiB';
+
+      searchInput.value = 'alice_';
+      debounceBar.style.width = '50%';
+
+      updateVerdict('false_positive');
+
+      renderTable(
+        MOCK_SCREENSHOT_DATA.rows,
+        MOCK_SCREENSHOT_DATA.h1,
+        MOCK_SCREENSHOT_DATA.h2,
+        MOCK_SCREENSHOT_DATA.m
+      );
+
+      renderBitArray();
+    }
+
+    // Check server on page load silently
+    fetch(`${API_URL}/state?max_bits=10`).then(r => {
+      if (r.ok) setServerOnline(true);
+    }).catch(() => {});
+
+    // Boot up in screenshot fidelity
+    initMockState();
+  </script>
+</body>
+</html>

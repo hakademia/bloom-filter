@@ -4,17 +4,17 @@ Hakademia recognizes the people who originate, maintain, and contribute to each 
 
 ## Original creator
 
-- **[@your-github-username](https://github.com/your-github-username)** — Original project concept and initial implementation. [Edit this description to reflect the actual contribution.]
+- **[@your-github-username](https://github.com/your-github-username)** — Concept original, implémentation from scratch du Bloom Filter en Python (BLAKE2b + double hashing), architecture backend FastAPI + PostgreSQL, interface de visualisation interactive.
 
 ## Maintainers
 
-- **[@maintainer-username](https://github.com/maintainer-username)** — [Responsibility]
+- **[@your-github-username](https://github.com/your-github-username)** — Maintenance générale, revue des contributions, documentation.
 
 ## Contributors
 
 We appreciate everyone who improves this project. Contributions are also recorded in the Git history and GitHub pull requests.
 
-- [Add contributors here with their consent, or link to GitHub's contributors page.]
+- Contributions bienvenues — voir [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Attribution principles
 
