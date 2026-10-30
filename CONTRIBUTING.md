@@ -8,7 +8,7 @@ Thank you for contributing to a Hakademia community project!
 2. For substantial changes, open an issue first to discuss the approach.
 3. Be respectful, constructive, and welcoming in discussions and reviews.
 4. Never commit passwords, API keys, personal data, or other secrets.
-5. Ne jamais committer le fichier `dataset/users.csv` s'il contient des données personnelles réelles.
+5. Never commit the `dataset/users.csv` file if it contains actual personal data.
 
 ## Development workflow
 
@@ -21,15 +21,15 @@ Thank you for contributing to a Hakademia community project!
 
 ## Commit conventions
 
-Ce projet suit le format **Conventional Commits** :
+This project follows the **Conventional Commits** specification:
 
 ```
-<type>(<scope>): <description courte>
+<type>(<scope>): <short description>
 
-Types : feat | fix | docs | refactor | chore
-Scope : filter | server | frontend | db | seed | config
+Types: feat | fix | docs | refactor | chore
+Scope: filter | server | frontend | db | seed | config
 
-Exemples :
+Examples:
   feat(filter): add k override support
   fix(server): rebuild bloom filter from DB on startup
   docs(readme): add installation instructions
@@ -39,10 +39,10 @@ Exemples :
 ## Branch naming
 
 ```
-feat/<description>   → nouvelle fonctionnalité
-fix/<description>    → correction de bug
-docs/<description>   → documentation uniquement
-refactor/<description> → refactoring sans changement de comportement
+feat/<description>     → new feature
+fix/<description>      → bug fix
+docs/<description>     → documentation only
+refactor/<description> → refactoring without behavior change
 ```
 
 ## Pull request expectations

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bloom Filter — Démo interactive</title>
+  <title>Bloom Filter — Interactive Demo</title>
   <style>
     :root {
       --bg: #f8f9fa;
@@ -975,12 +975,12 @@
       </div>
       <div class="brand-text">
         <h1>Bloom Filter</h1>
-        <p>Démo interactive — PostgreSQL + double hashing BLAKE2b</p>
+        <p>Interactive Demo — PostgreSQL + BLAKE2b double hashing</p>
       </div>
     </div>
     <nav>
-      <button class="nav-btn active" onclick="activateNav(this)">Démo</button>
-      <button class="nav-btn" onclick="openAboutModal()">À propos</button>
+      <button class="nav-btn active" onclick="activateNav(this)">Demo</button>
+      <button class="nav-btn" onclick="openAboutModal()">About</button>
       <button class="nav-btn" onclick="openDocModal()">Documentation</button>
       <div class="live-badge" id="live-indicator">
         <span class="live-dot"></span>
@@ -1005,14 +1005,14 @@
         <!-- Capacité attendue (n) -->
         <div class="form-group">
           <div class="label-row">
-            <label class="field-label" for="slider-n">Capacité attendue (n)</label>
-            <div class="pill-value-box" id="pill-n">1 000</div>
+            <label class="field-label" for="slider-n">Expected capacity (n)</label>
+            <div class="pill-value-box" id="pill-n">1,000</div>
           </div>
           <div class="slider-container">
             <input type="range" id="slider-n" class="range-slider" min="100" max="100000" step="100" value="1000">
             <div class="range-ticks">
               <span>100</span>
-              <span>100 000</span>
+              <span>100,000</span>
             </div>
           </div>
         </div>
@@ -1020,7 +1020,7 @@
         <!-- Taux de faux positifs (p) -->
         <div class="form-group">
           <div class="label-row">
-            <label class="field-label" for="slider-p">Taux de faux positifs (p)</label>
+            <label class="field-label" for="slider-p">False positive rate (p)</label>
             <div class="percent-group">
               <div class="pill-value-box" id="pill-p">1</div>
               <span class="percent-sign">%</span>
@@ -1041,8 +1041,8 @@
         <div class="form-group">
           <div class="label-row">
             <label class="field-label" for="select-k">
-              Nombre de fonctions de hachage (k)
-              <span class="info-icon" title="k optimal = round((m / n) * ln(2)). Vous pouvez choisir Auto ou forcer une valeur personnalisée.">
+              Number of hash functions (k)
+              <span class="info-icon" title="Optimal k = round((m / n) * ln(2)). You can choose Auto or set a custom value.">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10"></circle>
                   <line x1="12" y1="16" x2="12" y2="12"></line>
@@ -1081,7 +1081,7 @@
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
-          Appliquer la configuration
+          Apply configuration
         </button>
 
         <!-- 3 Stats cards below button -->
@@ -1095,7 +1095,7 @@
               </svg>
             </div>
             <div class="stat-text-wrap">
-              <div class="stat-main-num" id="stat-val-m">9 592</div>
+              <div class="stat-main-num" id="stat-val-m">9,592</div>
               <div class="stat-sub-label">bits (m)</div>
             </div>
           </div>
@@ -1127,17 +1127,17 @@
             </div>
             <div class="stat-text-wrap">
               <div class="stat-main-num" id="stat-val-mem">1.17 KiB</div>
-              <div class="stat-sub-label">mémoire</div>
+              <div class="stat-sub-label">memory</div>
             </div>
           </div>
         </div>
       </section>
 
       <!-- CARD 2: Recherche / Insertion -->
-      <section class="card" aria-label="Recherche et Insertion">
+      <section class="card" aria-label="Search and Insert">
         <div class="card-header">
           <div class="step-number">2</div>
-          <h2 class="card-title">Recherche / Insertion</h2>
+          <h2 class="card-title">Search / Insert</h2>
         </div>
 
         <!-- Search Bar with Alice -->
@@ -1148,8 +1148,8 @@
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
           </div>
-          <input type="text" id="search-input" class="search-input" value="alice_" placeholder="Tape un username..." autocomplete="off">
-          <button class="clear-search-btn" onclick="clearInput()" title="Effacer">
+          <input type="text" id="search-input" class="search-input" value="alice_" placeholder="Type a username..." autocomplete="off">
+          <button class="clear-search-btn" onclick="clearInput()" title="Clear">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1164,21 +1164,21 @@
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            Vérifier
+            Check
           </button>
           <button class="btn-insert-alt" onclick="triggerInsert()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
-            Insérer
+            Insert
           </button>
         </div>
 
         <!-- Debounce indicator -->
         <div class="debounce-container">
           <div class="debounce-text-row">
-            <span>Délai de recherche (debounce)</span>
+            <span>Search debounce delay</span>
             <span>300 ms</span>
           </div>
           <div class="debounce-track">
@@ -1197,9 +1197,9 @@
             </svg>
           </div>
           <div class="verdict-content">
-            <div class="verdict-title" id="verdict-title">Faux positif !</div>
+            <div class="verdict-title" id="verdict-title">False positive!</div>
             <div class="verdict-description" id="verdict-desc">
-              Le Bloom Filter indique « présent » mais l'élément est absent de la base de données.
+              The Bloom Filter indicates "present" but the item is missing from the database.
             </div>
           </div>
         </div>
@@ -1211,11 +1211,11 @@
     <div class="col-right">
 
       <!-- CARD 3: Décomposition des hash -->
-      <section class="card" aria-label="Décomposition des hash">
+      <section class="card" aria-label="Hash decomposition">
         <div class="card-header justify-between">
           <div class="header-left">
             <div class="step-number">3</div>
-            <h2 class="card-title">Décomposition des hash <span class="card-subtitle">(double hashing)</span></h2>
+            <h2 class="card-title">Hash decomposition <span class="card-subtitle">(double hashing)</span></h2>
           </div>
           <div class="badge-pill-blake">BLAKE2b</div>
         </div>
@@ -1233,8 +1233,8 @@
           </div>
 
           <div class="hash-size-box">
-            <div class="hash-size-title">m (taille du tableau)</div>
-            <div class="hash-size-number" id="disp-m">9 592</div>
+            <div class="hash-size-title">m (array size)</div>
+            <div class="hash-size-number" id="disp-m">9,592</div>
           </div>
         </div>
 
@@ -1244,10 +1244,10 @@
             <thead>
               <tr>
                 <th class="th-i">i</th>
-                <th class="th-calc">Calcul : (h1 + i × h2) mod m</th>
+                <th class="th-calc">Calculation: (h1 + i × h2) mod m</th>
                 <th class="th-pos">Position</th>
                 <th class="th-bit">Bit</th>
-                <th class="th-status">Statut</th>
+                <th class="th-status">Status</th>
               </tr>
             </thead>
             <tbody id="hash-rows-body">
@@ -1258,34 +1258,34 @@
       </section>
 
       <!-- CARD 4: Visualisation du bit array -->
-      <section class="card" aria-label="Visualisation du bit array">
+      <section class="card" aria-label="Bit array visualization">
         <div class="card-header justify-between">
           <div class="header-left">
             <div class="step-number">4</div>
-            <h2 class="card-title">Visualisation du bit array</h2>
+            <h2 class="card-title">Bit array visualization</h2>
           </div>
 
           <!-- Legend -->
           <div class="bit-legend-group">
             <div class="bit-legend-item">
               <span class="legend-indicator legend-free"></span>
-              <span>0 (libre)</span>
+              <span>0 (empty)</span>
             </div>
             <div class="bit-legend-item">
               <span class="legend-indicator legend-occupied"></span>
-              <span>1 (occupé)</span>
+              <span>1 (set)</span>
             </div>
             <div class="bit-legend-item">
               <span class="legend-indicator legend-hash"></span>
-              <span>position(s) de hash</span>
+              <span>hash position(s)</span>
             </div>
           </div>
 
           <!-- Range selector -->
           <div class="select-bits-compact">
             <select id="select-bits-range" onchange="renderBitArray()">
-              <option value="256">Premiers 256 bits</option>
-              <option value="512">Premiers 512 bits</option>
+              <option value="256">First 256 bits</option>
+              <option value="512">First 512 bits</option>
             </select>
             <div class="chevron-icon">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1308,23 +1308,23 @@
   <div class="modal-backdrop" id="modal-about" onclick="closeModalOnBackdrop(event, 'modal-about')">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>À propos du Bloom Filter</h3>
+        <h3>About Bloom Filter</h3>
         <button class="modal-close-btn" onclick="closeModal('modal-about')">&times;</button>
       </div>
       <div class="modal-body">
         <p>
-          Un <strong>Bloom Filter</strong> est une structure de données probabiliste ultra-rapide qui permet de déterminer si un élément fait partie d'un ensemble en utilisant un espace mémoire minime.
+          A <strong>Bloom Filter</strong> is a space-efficient probabilistic data structure that rapidly determines whether an element is a member of a set using minimal memory.
         </p>
         <p>
-          <strong>Caractéristiques clés :</strong>
+          <strong>Key characteristics:</strong>
         </p>
         <ul style="margin-left: 20px; margin-bottom: 14px;">
-          <li>Zéro faux négatif : si le filtre dit « absent », l'élément n'a jamais été inséré.</li>
-          <li>Possibilité de faux positifs : si le filtre dit « présent », une vérification dans la source de vérité (PostgreSQL) confirme ou infirme l'existence de l'élément.</li>
-          <li>Double hashing BLAKE2b : génère <em>k</em> positions de hachage indépendantes à partir d'un seul condensat 128-bit sans collisions corrélées.</li>
+          <li>Zero false negatives: if the filter says "absent", the element was definitely never inserted.</li>
+          <li>Possibility of false positives: if the filter says "present", verification against the source of truth (PostgreSQL / SQLite) confirms or disproves existence.</li>
+          <li>BLAKE2b double hashing: generates <em>k</em> independent hash positions from a single 128-bit hash digest without correlated collisions.</li>
         </ul>
         <p style="font-size: 13px; color: var(--text-muted);">
-          Projet communautaire développé au sein de <strong>Hakademia</strong>.
+          A community project developed within <strong>Hakademia</strong>.
         </p>
       </div>
     </div>
@@ -1334,18 +1334,18 @@
   <div class="modal-backdrop" id="modal-doc" onclick="closeModalOnBackdrop(event, 'modal-doc')">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Documentation & Formules</h3>
+        <h3>Documentation & Formulas</h3>
         <button class="modal-close-btn" onclick="closeModal('modal-doc')">&times;</button>
       </div>
       <div class="modal-body">
-        <p><strong>Calcul de la taille optimale du tableau (m) :</strong></p>
+        <p><strong>Optimal bit array size (m):</strong></p>
         <p><code class="code-chip">m = ceil(-n * ln(p) / (ln(2)^2))</code></p>
-        <p style="margin-top: 10px;"><strong>Calcul du nombre optimal de fonctions de hash (k) :</strong></p>
+        <p style="margin-top: 10px;"><strong>Optimal number of hash functions (k):</strong></p>
         <p><code class="code-chip">k = round((m / n) * ln(2))</code></p>
-        <p style="margin-top: 10px;"><strong>Formule de double hashing (Kirsch & Mitzenmacher) :</strong></p>
+        <p style="margin-top: 10px;"><strong>Double hashing formula (Kirsch & Mitzenmacher):</strong></p>
         <p><code class="code-chip">pos_i = (h1 + i * h2) mod m</code></p>
         <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 10px;">
-          où <em>h1</em> et <em>h2</em> sont les moitiés haute et basse de la signature BLAKE2b (16 octets) du texte, avec <em>h2</em> rendu impair pour assurer la coprimalité.
+          where <em>h1</em> and <em>h2</em> are the upper and lower halves of the BLAKE2b 16-byte digest, with <em>h2</em> made odd to ensure coprimality with m.
         </p>
       </div>
     </div>
@@ -1367,11 +1367,11 @@
       memFormatted: '1.17 KiB',
       rows: [
         { i: 0, calc: '(8273648273648273 + 0 × 1827364817263) mod 9592', pos: 142, bit: 1, status: 'hash' },
-        { i: 1, calc: '(8273648273648273 + 1 × 1827364817263) mod 9592', pos: 891, bit: 0, status: 'vide' },
+        { i: 1, calc: '(8273648273648273 + 1 × 1827364817263) mod 9592', pos: 891, bit: 0, status: 'empty' },
         { i: 2, calc: '(8273648273648273 + 2 × 1827364817263) mod 9592', pos: 3201, bit: 1, status: 'hash' },
-        { i: 3, calc: '(8273648273648273 + 3 × 1827364817263) mod 9592', pos: 7432, bit: 0, status: 'vide' },
+        { i: 3, calc: '(8273648273648273 + 3 × 1827364817263) mod 9592', pos: 7432, bit: 0, status: 'empty' },
         { i: 4, calc: '(8273648273648273 + 4 × 1827364817263) mod 9592', pos: 512, bit: 1, status: 'hash' },
-        { i: 5, calc: '(8273648273648273 + 5 × 1827364817263) mod 9592', pos: 8901, bit: 0, status: 'vide' },
+        { i: 5, calc: '(8273648273648273 + 5 × 1827364817263) mod 9592', pos: 8901, bit: 0, status: 'empty' },
         { i: 6, calc: '(8273648273648273 + 6 × 1827364817263) mod 9592', pos: 2341, bit: 1, status: 'hash' },
       ],
       // Exact occupied bit positions in the first 256 bits shown in the screenshot
@@ -1443,7 +1443,7 @@
       const sliderN = document.getElementById('slider-n');
       const valN = parseInt(sliderN.value, 10);
       state.n = valN;
-      document.getElementById('pill-n').textContent = valN.toLocaleString('fr-FR');
+      document.getElementById('pill-n').textContent = valN.toLocaleString('en-US');
       const pctN = ((valN - 100) / (100000 - 100)) * 100;
       updateSliderFill(sliderN, pctN);
 
@@ -1475,12 +1475,12 @@
       state.k = state.kOverride !== null ? state.kOverride : kOptimal;
 
       // Update stat cards in Card 1
-      document.getElementById('stat-val-m').textContent = state.m.toLocaleString('fr-FR');
+      document.getElementById('stat-val-m').textContent = state.m.toLocaleString('en-US');
       document.getElementById('stat-val-k').textContent = state.k;
       document.getElementById('stat-val-mem').textContent = formatBytes(Math.ceil(state.m / 8));
 
       // Update Card 3 m display
-      document.getElementById('disp-m').textContent = state.m.toLocaleString('fr-FR');
+      document.getElementById('disp-m').textContent = state.m.toLocaleString('en-US');
     }
 
     document.getElementById('slider-n').addEventListener('input', updateConfigValues);
@@ -1569,7 +1569,7 @@
     function renderTable(steps, h1, h2, m) {
       document.getElementById('disp-h1').textContent = h1;
       document.getElementById('disp-h2').textContent = h2;
-      document.getElementById('disp-m').textContent = m.toLocaleString('fr-FR');
+      document.getElementById('disp-m').textContent = m.toLocaleString('en-US');
 
       const tbody = document.getElementById('hash-rows-body');
       tbody.innerHTML = '';
@@ -1587,8 +1587,8 @@
         }
 
         const statusHtml = bitIsSet
-          ? `<span class="status-badge-hash">hash</span>`
-          : `<span class="status-badge-empty">vide</span>`;
+          ? `<span class="status-badge-hash">hit</span>`
+          : `<span class="status-badge-empty">empty</span>`;
 
         tr.innerHTML = `
           <td class="td-i">${step.i}</td>
@@ -1642,7 +1642,7 @@
             cell.classList.add('is-occupied');
           }
 
-          cell.setAttribute('data-tooltip', `Bit #${bitIndex} : ${isOccupied ? '1 (occupé)' : '0 (libre)'}${isHashPos ? ' • Cible hash' : ''}`);
+          cell.setAttribute('data-tooltip', `Bit #${bitIndex}: ${isOccupied ? '1 (set)' : '0 (empty)'}${isHashPos ? ' • Hash target' : ''}`);
           rowEl.appendChild(cell);
         }
 
@@ -1662,7 +1662,7 @@
       let timingHtml = '';
       if (timing) {
         const dbStatus = timing.db_avoided
-          ? '<span style="color:#10b981;font-weight:600;">✓ Requête DB évitée</span>'
+          ? '<span style="color:#10b981;font-weight:600;">✓ DB query avoided</span>'
           : `<span>⏱️ DB (${timing.engine || 'DB'}): <b>${timing.db_ms} ms</b></span>`;
         timingHtml = `
           <div class="verdict-timing-badge">
@@ -1680,8 +1680,8 @@
             <circle cx="12" cy="17.5" r="1.2" fill="#ffffff"/>
           </svg>
         `;
-        title.textContent = 'Faux positif !';
-        desc.innerHTML = `Le Bloom Filter indique « présent » mais l'élément est absent de la base de données.${timingHtml}`;
+        title.textContent = 'False positive!';
+        desc.innerHTML = `The Bloom Filter indicates "present" but the item is missing from the database.${timingHtml}`;
       } else if (type === 'confirmed') {
         card.classList.add('state-confirmed');
         icon.innerHTML = `
@@ -1690,8 +1690,8 @@
             <path d="M8 12.5L10.5 15L16 9.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         `;
-        title.textContent = 'Confirmé en base de données';
-        desc.innerHTML = `Le Bloom Filter indique « présent » et l'élément existe bien dans la base de données.${timingHtml}`;
+        title.textContent = 'Confirmed in database';
+        desc.innerHTML = `The Bloom Filter indicates "present" and the item exists in the database.${timingHtml}`;
       } else if (type === 'absent') {
         card.classList.add('state-absent');
         icon.innerHTML = `
@@ -1700,8 +1700,8 @@
             <path d="M8 12H16" stroke="#111827" stroke-width="2" stroke-linecap="round"/>
           </svg>
         `;
-        title.textContent = 'Définitivement absent';
-        desc.innerHTML = `Au moins un bit est à 0. L'élément n'a jamais été inséré (0 faux négatif).${timingHtml}`;
+        title.textContent = 'Definitely absent';
+        desc.innerHTML = `At least one bit is 0. The item was never inserted (zero false negatives).${timingHtml}`;
       } else {
         // Idle
         icon.innerHTML = `
@@ -1710,8 +1710,8 @@
             <polyline points="12 6 12 12 16 14" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
           </svg>
         `;
-        title.textContent = 'En attente';
-        desc.textContent = "Tapez un texte pour rechercher ou insérer dans le filtre.";
+        title.textContent = 'Waiting';
+        desc.textContent = "Type something to search or insert into the filter.";
       }
     }
 
@@ -1859,10 +1859,10 @@
       if (online) {
         const engText = engine ? ` (${engine.toUpperCase()})` : '';
         indicator.innerHTML = `<span class="live-dot" style="background:#10b981;"></span> Live${engText}`;
-        if (dbCount) indicator.title = `${dbCount} éléments enregistrés en base`;
+        if (dbCount) indicator.title = `${dbCount} items recorded in database`;
       } else {
         indicator.innerHTML = '<span class="live-dot" style="background:#111827;"></span> Live';
-        indicator.title = 'Serveur hors-ligne (mode local)';
+        indicator.title = 'Server offline (local mode)';
       }
     }
 
@@ -1891,7 +1891,7 @@
     // ── INITIALIZATION (100% Screenshot Matching) ──
     function initMockState() {
       state.isInitialMock = true;
-      document.getElementById('pill-n').textContent = '1 000';
+      document.getElementById('pill-n').textContent = '1,000';
       document.getElementById('slider-n').value = 1000;
       updateSliderFill(document.getElementById('slider-n'), ((1000 - 100) / 99900) * 100);
 
@@ -1901,7 +1901,7 @@
 
       document.getElementById('select-k').value = 'auto';
 
-      document.getElementById('stat-val-m').textContent = '9 592';
+      document.getElementById('stat-val-m').textContent = '9,592';
       document.getElementById('stat-val-k').textContent = '7';
       document.getElementById('stat-val-mem').textContent = '1.17 KiB';
 

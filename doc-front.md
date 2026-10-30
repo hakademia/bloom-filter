@@ -1,14 +1,14 @@
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  🌸 Bloom Filter    Démo interactive — PostgreSQL + double hashing BLAKE2b  [Live]│
+│  🌸 Bloom Filter    Interactive Demo — PostgreSQL + BLAKE2b double hashing [Live]│
 └─────────────────────────────────────────────────────────────────────────────────┘
 
 ┌──────────────────────────┐  ┌──────────────────────────────────────────────────┐
-│  ⚙️ CONFIGURATION         │  │  🔢 DÉCOMPOSITION DES HASH (double hashing)      │
+│  ⚙️ CONFIGURATION         │  │  🔢 HASH DECOMPOSITION (double hashing)          │
 │                          │  │                                                  │
-│  Capacité (n)    [1 000] │  │  h1 = 8273648273648273   h2 = 1827364817263  m=9592│
+│  Capacity (n)    [1,000] │  │  h1 = 8273648273648273   h2 = 1827364817263  m=9592│
 │  ████████░░░░░░░░░░░░░   │  │                                                  │
-│                          │  │  i │ Calcul : h1 + i×h2 mod m    │ Pos  │ Bit  │
-│  Faux positifs (p)  [1%] │  │  ──┼─────────────────────────────┼──────┼──────│
+│                          │  │  i │ Calculation: h1 + i×h2 mod m│ Pos  │ Bit  │
+│  False positive (p) [1%] │  │  ──┼─────────────────────────────┼──────┼──────│
 │  ██░░░░░░░░░░░░░░░░░░░   │  │  🟣0│ 8273648... + 0×1827... mod m│  142 │  1 ✓ │
 │                          │  │  🟢1│ 8273648... + 1×1827... mod m│  891 │  0   │
 │  ┌──────────────────────┐│  │  🟡2│ 8273648... + 2×1827... mod m│ 3201 │  1 ✓ │
@@ -18,33 +18,33 @@
 │  └──────────────────────┘│  │  🟢6│ 8273648... + 6×1827... mod m│ 2341 │  1 ✓ │
 │                          │  └──────────────────────────────────────────────────┘
 │  ┌────────┬────────┬─────┤
-│  │ 9 592  │   7    │119B ││  ┌──────────────────────────────────────────────────┐
-│  │ bits(m)│hash(k) │ mem ││  │  🧮 BIT ARRAY (256 premiers bits)                │
+│  │ 9,592  │   7    │119B ││  ┌──────────────────────────────────────────────────┐
+│  │ bits(m)│hash(k) │ mem ││  │  🧮 BIT ARRAY (first 256 bits)                   │
 │  └────────┴────────┴─────┘│  │                                                  │
-│                          │  │  ⬛=0 (libre)   🟦=1 (occupé)   🟣=position tapée │
+│                          │  │  ⬛=0 (empty)   🟦=1 (set)   🟣=queried position  │
 │  Override k      [auto]  │  │                                                  │
 │  ░░░░░░░░░░░░░░░░░░░░░░  │  │  ⬛⬛🟦⬛⬛🟦🟦⬛🟣⬛⬛🟦⬛⬛⬛🟦  ← bits 0–15   │
-│  0 = k optimal           │  │  ⬛🟦⬛⬛🟦⬛⬛⬛⬛🟦⬛🟣⬛⬛🟦⬛  ← bits 16–31  │
+│  0 = optimal k           │  │  ⬛🟦⬛⬛🟦⬛⬛⬛⬛🟦⬛🟣⬛⬛🟦⬛  ← bits 16–31  │
 │                          │  │  🟦⬛⬛⬛⬛🟦⬛⬛🟦⬛⬛⬛🟦⬛🟣⬛  ← bits 32–47  │
-│  [  Appliquer config   ] │  │  ⬛⬛🟦⬛🟦⬛⬛🟦⬛⬛⬛🟦⬛⬛⬛🟦  ← bits 48–63  │
-└──────────────────────────┘  │  ... (jusqu'au bit 255)                          │
+│  [ Apply config        ] │  │  ⬛⬛🟦⬛🟦⬛⬛🟦⬛⬛⬛🟦⬛⬛⬛🟦  ← bits 48–63  │
+└──────────────────────────┘  │  ... (up to bit 255)                             │
                               └──────────────────────────────────────────────────┘
 ┌──────────────────────────┐
-│  🔍 RECHERCHE / INSERTION │
+│  🔍 SEARCH / INSERTION   │
 │                          │
 │  ┌──────────────────────┐│
-│  │  alice_             ││  ← input avec curseur
+│  │  alice_             ││  ← input with cursor
 │  └──────────────────────┘│
-│  ████████████░░░  300ms  │  ← barre debounce qui se remplit
+│  ████████████░░░  300ms  │  ← filling debounce bar
 │                          │
-│  [ ➕ Insérer ]  [🗑 Reset]│
+│  [ ➕ Insert ]   [🗑 Reset]│
 │                          │
 │  ┌──────────────────────┐│
-│  │  ⚠️  FAUX POSITIF !   ││  ← verdict (change couleur)
-│  │  Bloom dit "présent" ││
-│  │  mais absent de DB   ││
+│  │  ⚠️ FALSE POSITIVE!   ││  ← verdict (changes color)
+│  │  Bloom says "present"││
+│  │  but missing in DB   ││
 │  └──────────────────────┘│
 │                          │
 │  Items:■42  m:■9592      │
-│  k:■7       Mém:■119B    │
+│  k:■7       Mem:■119B    │
 └──────────────────────────┘

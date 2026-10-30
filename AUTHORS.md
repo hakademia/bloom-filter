@@ -4,17 +4,17 @@ Hakademia recognizes the people who originate, maintain, and contribute to each 
 
 ## Original creator
 
-- **[@AaronDAmin](https://github.com/AaronDAmin)** (Aaron Vyaleveka) — Concept original, implémentation from scratch du Bloom Filter en Python (BLAKE2b + double hashing), architecture backend FastAPI + PostgreSQL, interface de visualisation interactive.
+- **[@AaronDAmin](https://github.com/AaronDAmin)** (Aaron Vyaleveka) — Original concept, from-scratch Bloom Filter implementation in Python (BLAKE2b + double hashing), FastAPI + PostgreSQL backend architecture, interactive visualization interface.
 
 ## Maintainers
 
-- **[@AaronDAmin](https://github.com/AaronDAmin)** (Aaron Vyaleveka) — Maintenance générale, revue des contributions, documentation.
+- **[@AaronDAmin](https://github.com/AaronDAmin)** (Aaron Vyaleveka) — General maintenance, contribution reviews, documentation.
 
 ## Contributors
 
 We appreciate everyone who improves this project. Contributions are also recorded in the Git history and GitHub pull requests.
 
-- Contributions bienvenues — voir [CONTRIBUTING.md](CONTRIBUTING.md).
+- Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Attribution principles
 
