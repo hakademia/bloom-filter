@@ -4,7 +4,7 @@
 
 A community project developed within **Hakademia**.
 
-![Bloom Filter Interactive Dashboard](assets/Bloom%20Filter%20Interactive%20Dashboard.png)
+![Bloom Filter Interactive Dashboard](assets/Minimal%20Bloom%20Filter%20Dashboard.png)
 
 ## Overview
 
