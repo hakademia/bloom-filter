@@ -97,7 +97,7 @@ python seed.py --limit 2500 --db auto
 
 ## Project credits
 
-**Original creator:** [@your-github-username](https://github.com/your-github-username)  
+**Original creator:** [@AaronDAmin](https://github.com/AaronDAmin) (Aaron Vyaleveka)  
 **Maintained by:** [Project maintainers](AUTHORS.md)  
 **Community:** [Hakademia](https://github.com/hakademia)
 
