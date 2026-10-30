@@ -4,6 +4,8 @@
 
 A community project developed within **Hakademia**.
 
+![Bloom Filter Interactive Dashboard](assets/Bloom%20Filter%20Interactive%20Dashboard.png)
+
 ## Overview
 
 Un Bloom Filter est une structure de données probabiliste qui répond à la question "est-ce que cet élément a déjà été vu ?" de façon ultra-rapide et en très peu de mémoire — mais avec une possibilité de faux positifs.
